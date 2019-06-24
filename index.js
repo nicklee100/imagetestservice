@@ -9,19 +9,19 @@ var upload = require('./s3upload.js')
 const singleUpload = upload.single('image')
 
 const aws = require('aws-sdk');
+aws.config.update({
+  secretAccessKey: "",
+  accessKeyId: "",
+  region: 'us-east-2'
+
+})
+
 const s3 = new aws.S3();
 
 
 var save = multer({
   limits: {fieldSize: 25 * 1024 * 1024}
 });
-
-aws.config.update({
-  secretAccessKey: process.env.AWSSecretKey,
-  accessKeyId: process.env.AWSAccessKeyId,
-  region: 'us-east-2'
-
-})
 
 //bellow works with sendRawScreenshot & saves to filesystem
 
@@ -113,7 +113,7 @@ function uploadTestPromise(image,metaData){
       const snapshotname = metaData.snapshotname;
 
       const data = {
-        Key: `batches/${os}/${browser}/${url}/${snapshotname}`,  //the file name
+        Key: `batches/June102018Batch/${browser}/${url}/${snapshotname}`,  //the file name
         Body: image,
         ContentEncoding: 'base64',
         ContentType: 'image/jpeg',
@@ -155,7 +155,6 @@ function compareBaseline(image){  // hardcoded example
       console.log(data)
       const buffer = new Buffer(data.Body, 'base64');
 
-
       // fs.writeFile('./screenshot2.png', buffer, 'binary', (err, data) => {
       //     if(err){console.log('error', err)}
       //     else {
@@ -173,12 +172,16 @@ function compareBaseline(image){  // hardcoded example
 
 }
 
-// convert raw image data to object url
-// convert data url to file then append to formdata, openbay vidmob
-
-
 function getBaselinePromise(metaData){
   return new Promise((resolve, reject)=>{
+
+    aws.config.update({
+      secretAccessKey: process.env.AWSSecretKey,
+      accessKeyId: process.env.AWSAccessKeyId,
+      region: 'us-east-2'
+    
+    })
+
     try {
       const os = metaData.os;
       const browser = metaData.browser;
@@ -188,7 +191,7 @@ function getBaselinePromise(metaData){
       const params = {Bucket: 'imagetestservice', Key: `baselines/${os}/${browser}/${url}/${snapshotname}`}
       s3.getObject(params, function(error, data){
         if(error){
-          console.log("error:", error);
+          console.log("error::", error);
           reject(error)
         } else {
 
@@ -208,7 +211,8 @@ async function checkWindow(testImage, metaData){  //testImage, metaData,
   //pulls down correct baseline base on testImage name and meta data
 
   const baselineBuffer = await getBaselinePromise(metaData)
-  //fs.writeFile("uml.png", baselineBuffer, 'binary', ()=>{console.log('written')})
+  fs.writeFile("umlbaseline.png", baselineBuffer, 'binary', ()=>{console.log('written')})
+ 
   testImageBuffer = new Buffer(testImage, 'base64');
   const diffImage = await AmazonCompareScreenshots(testImageBuffer,baselineBuffer)
 

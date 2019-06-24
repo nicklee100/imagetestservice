@@ -19,4 +19,4 @@ const upload = multer({
 
 module.exports = upload;
 
-///    acl: 'public-read',      // this will be a problem
+///    acl: 'public-read',      // this will be a problem as I don't want anyone accessing image data

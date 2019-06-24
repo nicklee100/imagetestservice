@@ -61,8 +61,6 @@ async function takeBaseLine(){
     } finally {
       await driver.quit()
     }
-
-
 }
 
 async function runTest(){
@@ -95,7 +93,70 @@ async function runTest(){
 
 
 
-runTest()
+//runTest()
 // uploadBaseline('asbl3ij2', {browser: 'chrome', os:'MacOSX.14.12', url: 'uml.student.life',snapshotname:'initialsnapshot', resolution:'900x1200'})
 
-//might want to have a function that runs just baselines
+async function baseLineExample(){
+  const driver = new webdriver.Builder()
+    .withCapabilities(webdriver.Capabilities.chrome())
+    .build()
+
+    try {
+      await driver.get("https://www.uml.edu/student-life/");
+      const search = await driver.findElement(By.xpath('//*[@id="form"]/header/div/div[2]/nav/ul/li[5]'))
+      await search.click()
+      //await search.sendKeys("Umass Lowell Student")
+      const image = await driver.takeScreenshot()
+
+      const metaData = {
+        os:'Linux',
+        browser: 'chrome',
+        url: 'uml.student.life',
+        snapshotname:'initial.png',
+        resolution:'900x1200'
+      };
+
+      const buffer = new Buffer(image, 'base64');
+      uploadBaseline(buffer,metaData)
+
+    } catch (error) {
+      console.log(error)
+    } finally {
+      await driver.quit()
+    }
+}
+
+async function runTestExample(){
+  const driver = new webdriver.Builder()
+    .withCapabilities(webdriver.Capabilities.chrome())
+    .build()
+
+    try {
+      await driver.get("https://www.uml.edu/student-life/");
+      const search = await driver.findElement(By.xpath('//*[@id="form"]/header/div/div[2]/nav/ul/li[5]'))
+      await search.click()
+      const input = await driver.findElement(By.xpath('//*[@id="form"]/header/div/div[2]/nav/ul/li[5]/uml-search-popout/div/div/div/div/div/div[2]/div/label/div[2]/input'))
+      await input.sendKeys("Physics")
+
+      let image = await driver.takeScreenshot()
+      const metaData = {
+        os:'Linux',
+        browser: 'chrome',
+        url: 'uml.student.life',
+        snapshotname:'initial.png',
+        resolution:'900x1200'
+      };
+
+    image = new Buffer(image, 'base64');
+    checkWindow(image,metaData)
+    } catch (error){
+      console.log(error)
+    } finally {
+      await driver.quit()
+    }
+}
+
+
+
+//baseLineExample()
+runTestExample()

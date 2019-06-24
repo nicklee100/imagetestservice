@@ -23,7 +23,6 @@ const amazonCompareScreenshots = (image1, image2) => {
   })
 }
 
-
 const amazonCompareScreenshotsToBase64 = (image1, image2) => {
   // fs.writeFile('images/currupt1.png', image1, 'binary', function(err){
   //   if(err) console.error(err)
